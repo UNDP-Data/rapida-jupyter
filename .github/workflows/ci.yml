@@ -37,6 +37,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             PRODUCTION=true
+          outputs: type=docker,dest=${{ runner.temp }}/myimage.tar
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
