@@ -9,8 +9,38 @@ on:
   pull_request:
 
 jobs:
+  build-image:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+      labels: ${{ steps.meta.outputs.labels }}
+    env:
+      IMAGE_NAME: ${{ github.repository }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.IMAGE_NAME }}
+
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            PRODUCTION=true
+
   deploy-acr:
     name: Build and deploy to Azure Container Registry
+    needs: build-image
     runs-on: ubuntu-latest
     environment:
       name: azure container registry
@@ -20,11 +50,6 @@ jobs:
       contents: read
       packages: write
     steps:
-    - name: Extract Docker metadata
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        images: ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_NAME }}
     - name: Checkout repository
       uses: actions/checkout@v4
     - name: Log into ACR
@@ -33,19 +58,17 @@ jobs:
         registry: ${{ secrets.ACR_ENDPOINT }}
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
-    - name: Build and push
-      uses: docker/build-push-action@v5
-      with:
-        push: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')}}
-        context: .
-        file: Dockerfile
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        build-args: |
-          PRODUCTION=true
+    - name: Load Docker image and push to ACR
+      if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')}}
+      run: |
+        echo "${{ needs.build-image.outputs.tags }}" | tr ',' '\n' | grep "${{ env.IMAGE_NAME }}" | while read TAG; do
+          docker tag ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_NAME }}:$TAG $TAG
+          docker push $TAG
+        )
 
   deploy-github:
     name: Build and deploy to GitHub container registry
+    needs: build-image
     runs-on: ubuntu-latest
     environment:
       name: github container registry
@@ -66,19 +89,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile
-          push: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')}}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            PRODUCTION=true
+      - name: Load Docker image and push to ACR
+        if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')}}
+        run: |
+          echo "${{ needs.build-image.outputs.tags }}" | tr ',' '\n' | grep "${{ env.IMAGE_NAME }}" | while read TAG; do
+            docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG $TAG
+            docker push $TAG
+          )
