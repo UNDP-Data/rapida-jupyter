@@ -1,0 +1,14 @@
+./.devcontainer/
+./.github/
+./.venv
+./venv
+dist/
+data/
+*egg-info/
+.gitignore
+docker-compose.yaml
+Dockerfile
+Pipfile
+Pipfile.lock
+.env.example
+.env
