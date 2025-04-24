@@ -59,7 +59,7 @@ jobs:
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
     - name: Load Docker image and push to ACR
-      if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')}}
+      #if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')}}
       run: |
         echo "${{ needs.build-image.outputs.tags }}" | tr ',' '\n' | grep "${{ env.IMAGE_NAME }}" | while read TAG; do
           docker tag ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_NAME }}:$TAG $TAG
@@ -90,7 +90,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Load Docker image and push to ACR
-        if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')}}
+        #if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')}}
         run: |
           echo "${{ needs.build-image.outputs.tags }}" | tr ',' '\n' | grep "${{ env.IMAGE_NAME }}" | while read TAG; do
             docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG $TAG
