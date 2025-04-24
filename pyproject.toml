@@ -29,11 +29,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/UNDP-Data/geo-cb-surge"
-Documentation = "https://github.com/UNDP-Data/geo-cb-surge"
-Repository = "https://github.com:UNDP-Data/geo-cb-surge.git"
-Issues = "https://github.com/UNDP-Data/geo-cb-surge/issues"
-#Changelog = "https://github.com/UNDP-Data/geo-cb-surge/blob/master/CHANGELOG.md"
+Homepage = "https://github.com/UNDP-Data/rapida-jupyter"
+Documentation = "https://github.com/UNDP-Data/rapida-jupyter"
+Repository = "https://github.com:UNDP-Data/rapida-jupyter.git"
+Issues = "https://github.com/UNDP-Data/rapida-jupyter/issues"
+#Changelog = "https://github.com/UNDP-Data/rapida-jupyter/blob/master/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
     packages = ["rapida_jupyter"]
