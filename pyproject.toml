@@ -1,0 +1,58 @@
+[project]
+name = "rapida-jupyter"
+version = "0.0.1"
+description = "The repository to manage Jupyter Hub environment for RAPIDA tool"
+requires-python = ">=3.12"
+authors = [
+    { name = 'Ioan Ferencik'},
+    { name = 'Joseph Thuha'},
+    { name = 'Jin Igarashi'},
+    { name = "United Nations Development Programme", email = "data@undp.org" }
+]
+readme = "README.md"
+dependencies = [
+    "jupyterhub",
+    "jupyterlab",
+    "notebook",
+    "dockerspawner",
+    "matplotlib",
+    "jupyterlab_widgets",
+    "ipywidgets",
+    "leafmap",
+    "mapclassify",
+    "xarray",
+    "localtileserver"
+]
+
+[project.urls]
+Homepage = "https://github.com/UNDP-Data/geo-cb-surge"
+Documentation = "https://github.com/UNDP-Data/geo-cb-surge"
+Repository = "https://github.com:UNDP-Data/geo-cb-surge.git"
+Issues = "https://github.com/UNDP-Data/geo-cb-surge/issues"
+#Changelog = "https://github.com/UNDP-Data/geo-cb-surge/blob/master/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+    packages = ["rapida_jupyter"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    ".devcontainer",
+    ".github",
+    ".dockerignore",
+    "docker-compose.yml",
+    "Dockerfile",
+    ".gitignore",
+    ".pre-commit-config.yaml",
+    "tests",
+    "Makefile"
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+#[tool.hatchling.dependencies]
+#GDAL = ">=3.6.0, <4.0.0"  # Specify the GDAL version range
