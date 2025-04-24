@@ -18,10 +18,14 @@ dependencies = [
     "matplotlib",
     "jupyterlab_widgets",
     "ipywidgets",
+    "ipyfilechooser",
     "leafmap",
     "mapclassify",
     "xarray",
-    "localtileserver"
+    "localtileserver",
+    "rasterio",
+    "jwt",
+    "oauthlib"
 ]
 
 [project.urls]

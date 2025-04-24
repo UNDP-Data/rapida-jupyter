@@ -27,7 +27,7 @@ if [ ! -z "$JUPYTER_USERS" ]; then
             chown -R $username:$username /home/$username/.ipython
 
             # Now copy the cell hook
-            cp /app/cbsurge/az/cell_hook.py /home/$username/.ipython/profile_default/startup/cell_hook.py
+            cp /app/rapida_jupyter/az/cell_hook.py /home/$username/.ipython/profile_default/startup/cell_hook.py
             chown $username:$username /home/$username/.ipython/profile_default/startup/cell_hook.py
 
         else
