@@ -3,7 +3,7 @@
 # install rapida tool and dependencies
 pipenv run pip install playwright
 pipenv run playwright install chromium --with-deps
-pipenv run pip install git+https://github.com/UNDP-Data/geo-cb-surge
+pipenv run pip install git+https://github.com/UNDP-Data/rapida
 
 # Create multiple users from environment variable SSH_USERS
 # Format: JUPYTER_USERS="user1:password1 user2:password2 user3:password3"
