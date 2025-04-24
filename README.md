@@ -61,5 +61,5 @@ make shell
 Note. if you use `make shell`, entrypoint.sh is not executed. That means you have to install RAPIDA tool manually like below.
 
 ```shell
-pipenv run pip install git+https://github.com/UNDP-Data/geo-cb-surge
+pipenv run pip install git+https://github.com/UNDP-Data/rapida
 ```
