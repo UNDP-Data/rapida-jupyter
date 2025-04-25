@@ -1,8 +1,6 @@
 #!/bin/bash
 
 # install rapida tool and dependencies
-pipenv run pip install playwright
-pipenv run playwright install chromium --with-deps
 pipenv run pip install git+https://github.com/UNDP-Data/rapida
 
 # Create multiple users from environment variable SSH_USERS

@@ -1,7 +1,7 @@
 from IPython import get_ipython
 from rapida_jupyter.az.authwidget import AuthWidget
 from rapida_jupyter.util.in_notebook import in_notebook
-from cbsurge.az.surgeauth import SurgeTokenCredential
+from rapida.az.surgeauth import SurgeTokenCredential
 
 def pre_cell_execution(exec_info):
     if in_notebook():

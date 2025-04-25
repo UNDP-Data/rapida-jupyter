@@ -5,9 +5,9 @@ from IPython.core.display_functions import display
 from ipyfilechooser import FileChooser
 from ipyleaflet import DrawControl, GeoJSON
 
-# from cbsurge.admin import save
-from cbsurge.admin.ocha import fetch_admin as fetch_ocha_admin
-from cbsurge.admin.osm import fetch_admin as fetch_osm_admin
+# from rapida.admin import save
+from rapida.admin.ocha import fetch_admin as fetch_ocha_admin
+from rapida.admin.osm import fetch_admin as fetch_osm_admin
 
 # Initialize global parameters
 global_params = {
