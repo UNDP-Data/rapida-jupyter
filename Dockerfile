@@ -40,7 +40,8 @@ COPY README.md README.md
 ENV PIPENV_VENV_IN_PROJECT=1
 ENV PLAYWRIGHT_BROWSERS_PATH=0
 RUN pipenv install --python 3 && \
-    pipenv run pip install .
+    pipenv run pip install playwright && \
+    pipenv run playwright install chromium --with-deps
 ENV VIRTUAL_ENV=/app/.venv
 
 # copy tippecanoe to production docker image
