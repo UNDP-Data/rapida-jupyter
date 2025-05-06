@@ -5,7 +5,7 @@ from IPython.core.display_functions import display
 from ipyfilechooser import FileChooser
 from ipyleaflet import DrawControl, GeoJSON
 
-# from rapida.admin import save
+from rapida.admin import save
 from rapida.admin.ocha import fetch_admin as fetch_ocha_admin
 from rapida.admin.osm import fetch_admin as fetch_osm_admin
 
@@ -86,9 +86,9 @@ def load_ui():
     def save_admin(b):
         if not global_params["data"]:
             load_admin(b)
-        # TODO: save method seems having been deleted
-        raise RuntimeError("save method seems having been deleted")
-        # save(geojson_dict=global_params["data"], dst_path=parameters['selected'])
+        # # TODO: save method seems having been deleted
+        # raise RuntimeError("save method seems having been deleted")
+        save(geojson_dict=global_params["data"], dst_path=parameters['selected'])
 
     # Observers
     datasource_select.observe(update_datasource, names='value')
