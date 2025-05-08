@@ -28,10 +28,24 @@ def assessment_gui(project_path):
 
         for component in components:
             variables = session.get_variables(component=component)
-            var_checkboxes = [widgets.Checkbox(value=False, description=v) for v in variables]
-            var_box = widgets.VBox(var_checkboxes)
-            tab_panels[component] = var_box
-            tab_children.append(var_box)
+            checkboxes = [widgets.Checkbox(value=False, description=session.get_variable_title(component=component, variable=v)) for v in variables]
+
+            if len(checkboxes) > 5:
+                cols = 2 if len(checkboxes) <= 10 else 3
+                rows = (len(checkboxes) + cols - 1) // cols
+                grid = widgets.GridBox(
+                    children=checkboxes,
+                    layout=widgets.Layout(
+                        grid_template_columns=' '.join(['auto'] * cols),
+                        grid_gap="5px 5px"
+                    )
+                )
+                var_container = grid
+            else:
+                var_container = widgets.VBox(checkboxes)
+
+            tab_panels[component] = var_container
+            tab_children.append(var_container)
 
         tabs = widgets.Tab(children=tab_children)
         for i, component in enumerate(components):
@@ -51,7 +65,14 @@ def assessment_gui(project_path):
             with output:
                 output.clear_output()
                 for component, var_box in tab_panels.items():
-                    selected_vars = [cb.description for cb in var_box.children if cb.value]
+                    selected_vars = [
+                        session.get_var_id_from_title(cb.description) for cb in var_box.children
+                        if isinstance(cb, widgets.Checkbox) and cb.value
+                    ]
+                    if isinstance(var_box, widgets.GridBox):
+                        selected_vars = [
+                            session.get_var_id_from_title(cb.description) for cb in var_box.children if cb.value
+                        ]
                     for var in selected_vars:
                         cmd_args = f"-c {component} -v {var}"
                         run_cmd("assess", cmd_args)
