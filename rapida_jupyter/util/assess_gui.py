@@ -21,10 +21,14 @@ def popd():
     else:
         print("Directory stack is empty.")
 
-def assessment_gui(project_path):
+def assessment_gui(project_path=None, component=None):
     pushd(project_path)
     with Session() as session:
-        components = getComponents()
+        if component is None:
+            components = session.get_components()
+        else:
+            components = [component]
+        # components = getComponents()
         tab_panels = {}
         tab_checkboxes = {}
         tab_select_all_boxes = []
