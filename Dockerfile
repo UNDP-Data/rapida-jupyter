@@ -48,8 +48,10 @@ ENV VIRTUAL_ENV=/app/.venv
 COPY --from=tippecanoe-builder /tippecanoe/tippecanoe* /usr/local/bin/
 COPY --from=tippecanoe-builder /tippecanoe/tile-join /usr/local/bin/
 
-# copy rest of files to the image.
-COPY . .
+# copy rapida_jupyter package and pyproject.toml to the image.
+COPY rapida_jupyter /app/rapida_jupyter
+COPY pyproject.toml /app/pyproject.toml
+COPY README.md /app/README.md
 
 # Conditional installation based on PRODUCTION variable
 RUN if [ -z "$PRODUCTION" ]; then \
@@ -58,14 +60,10 @@ RUN if [ -z "$PRODUCTION" ]; then \
         pipenv run pip install . ; \
     fi
 RUN pipenv --clear
-# Create a group and set permissions for /app
-RUN groupadd ${GROUP_NAME} && \
-    usermod -aG ${GROUP_NAME} root && \
-    mkdir -p /app && \
-    chown -R :${GROUP_NAME} /app && \
-    chmod -R g+rwx /app && \
-    mkdir -p $DATA_DIR && \
-    chown -R :${GROUP_NAME} $DATA_DIR
+
+
+# copy rest of files to the image.
+COPY . .
 
 RUN chmod +x /app/create_user.sh
 RUN chmod +x /app/entrypoint.sh

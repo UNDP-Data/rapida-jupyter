@@ -5,7 +5,26 @@ pipenv run pip install git+https://github.com/UNDP-Data/rapida
 
 # Create multiple users from environment variable SSH_USERS
 # Format: JUPYTER_USERS="user1:password1 user2:password2 user3:password3"
+
+
 if [ ! -z "$JUPYTER_USERS" ]; then
+     # Create a group and set permissions for /app
+    mkdir -p /data/notebooks
+    cp -r /app/notebooks /data/notebooks
+
+    groupadd ${GROUP_NAME} && \
+         usermod -aG ${GROUP_NAME} root && \
+         mkdir -p /app && \
+         chown -R :${GROUP_NAME} /app && \
+         chmod -R g+rwx /app && \
+         mkdir -p $DATA_DIR && \
+         chown -R :${GROUP_NAME} $DATA_DIR
+
+    # Set permissions so that users in GROUP_NAME can write to /data/notebooks
+    chown -R :${GROUP_NAME} /data/notebooks
+    chmod -R g+rwX /data/notebooks
+
+
     for user_info in $JUPYTER_USERS; do
         IFS=':' read -r username password <<< "$user_info"
         if [ ! -z "$username" ] && [ ! -z "$password" ]; then
@@ -33,6 +52,7 @@ if [ ! -z "$JUPYTER_USERS" ]; then
         fi
     done
 fi
+
 
 # Determine the port based on the PRODUCTION environment variable
 if [ "$PRODUCTION" = "true" ]; then
