@@ -9,8 +9,8 @@ pipenv run pip install git+https://github.com/UNDP-Data/rapida
 
 if [ ! -z "$JUPYTER_USERS" ]; then
      # Create a group and set permissions for /app
-    mkdir -p /data/notebooks
-    cp -r /app/notebooks /data/notebooks
+#    mkdir -p /data/notebooks
+
 
     groupadd ${GROUP_NAME} && \
          usermod -aG ${GROUP_NAME} root && \
@@ -20,9 +20,11 @@ if [ ! -z "$JUPYTER_USERS" ]; then
          mkdir -p $DATA_DIR && \
          chown -R :${GROUP_NAME} $DATA_DIR
 
+    cp -r /app/notebooks ${DATA_DIR}/notebooks
+
     # Set permissions so that users in GROUP_NAME can write to /data/notebooks
-    chown -R :${GROUP_NAME} /data/notebooks
-    chmod -R g+rwX /data/notebooks
+    chown -R :${GROUP_NAME} ${DATA_DIR}/notebooks
+    chmod -R g+rwX ${DATA_DIR}/notebooks
 
 
     for user_info in $JUPYTER_USERS; do
