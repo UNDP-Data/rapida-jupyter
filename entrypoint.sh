@@ -20,11 +20,17 @@ if [ ! -z "$JUPYTER_USERS" ]; then
          mkdir -p $DATA_DIR && \
          chown -R :${GROUP_NAME} $DATA_DIR
 
-    cp -r /app/notebooks ${DATA_DIR}/notebooks
+    NOTEBOOKS_DIR=${DATA_DIR}/notebooks_templates
+
+    if [ ! -d "${NOTEBOOKS_DIR}" ]; then
+        mkdir -p ${NOTEBOOKS_DIR}
+    fi
+
+    cp -r /app/notebooks/. ${NOTEBOOKS_DIR}/.
 
     # Set permissions so that users in GROUP_NAME can write to /data/notebooks
-    chown -R :${GROUP_NAME} ${DATA_DIR}/notebooks
-    chmod -R g+rwX ${DATA_DIR}/notebooks
+    chown -R :${GROUP_NAME} ${NOTEBOOKS_DIR}
+    chmod -R g+rwX ${NOTEBOOKS_DIR}
 
 
     for user_info in $JUPYTER_USERS; do
