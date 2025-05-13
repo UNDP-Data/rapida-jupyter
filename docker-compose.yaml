@@ -9,6 +9,7 @@ services:
       - ./jupyterhub_config.py:/app/jupyterhub_config.py
       - ./Makefile:/app/Makefile
       - ./rapida_jupyter:/app/rapida_jupyter # mount app folder to container
+      - ./notebooks:/app/notebooks # mount notebooks folder to container
       # uncomment to mount token info from local
       # - ~/.rapida:/root/.rapida
       # uncomment to mount data folder from local
