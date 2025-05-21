@@ -11,7 +11,7 @@ RUN make
 
 
 # Use the GDAL image as the base
-FROM ghcr.io/osgeo/gdal:ubuntu-full-3.10.0
+FROM ghcr.io/osgeo/gdal:ubuntu-full-3.11.0
 
 ARG GROUP_NAME="rapida"
 ARG DATA_DIR='/data'
