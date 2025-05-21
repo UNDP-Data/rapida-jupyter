@@ -1,5 +1,9 @@
 #!/bin/bash
 
+GDAL_VERSION=$(gdalinfo --version | grep -oP 'GDAL \K[0-9.]+')
+echo $GDAL_VERSION
+pipenv run pip install --no-cache-dir --force-reinstall --no-binary=gdal gdal==$GDAL_VERSION
+
 # install rapida tool and dependencies
 pipenv run pip install git+https://github.com/UNDP-Data/rapida
 
