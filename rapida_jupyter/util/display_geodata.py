@@ -34,6 +34,10 @@ def display_data(gpkg_path=None, gdf=None, raster=None, col=None, cmap='viridis'
     if gdf is not None:
         columns = [c for c in gdf.columns if c != 'geometry']
 
+    number_of_classes = 5
+
+    if len(gdf) < number_of_classes:
+        number_of_classes = len(gdf)
     visualization_params = {
         'layer_name': 'vector_layer',
         'column': col or (columns[0] if columns else None),
@@ -43,12 +47,16 @@ def display_data(gpkg_path=None, gdf=None, raster=None, col=None, cmap='viridis'
         'info_mode': None,
         'raster_min': None,
         'raster_max': None,
+        'k': number_of_classes,
     }
 
     column_selector = widgets.Dropdown(options=columns, description='Column:', value=visualization_params['column'])
     colormap_selector = widgets.Dropdown(options=leafmap.list_palettes(), description='Colormap:', value=cmap)
     classification_selector = widgets.Dropdown(options=classifiers, description='Classification:',
                                                value=classification_method)
+
+    warning_label = widgets.Label(
+        value='')
 
     def update_map():
         """Updates the map with the current vector or raster layer."""
@@ -61,8 +69,25 @@ def display_data(gpkg_path=None, gdf=None, raster=None, col=None, cmap='viridis'
         except:
             pass
 
-        if gdf is not None:
-            m.add_data(gdf, **visualization_params)
+        warning_label.value = ''
+
+        if gdf is not None and visualization_params['column']:
+            values = gdf[visualization_params['column']].dropna()
+            unique_values = values.unique()
+
+            if len(unique_values) < 2:
+                warning_label.value = (
+                    f"⚠️ Warning: Not enough unique values in '{visualization_params['column']}' to classify. "
+                    "Showing unclassified layer."
+                )
+                # Display basic GeoDataFrame without classification
+                m.add_gdf(gdf, layer_name='vector_layer', info_mode=visualization_params['info_mode'])
+            else:
+                try:
+                    m.add_data(gdf, **visualization_params)
+                except ValueError as e:
+                    warning_label.value = f"⚠️ Error applying classification: {e}"
+                    m.add_gdf(gdf, layer_name='vector_layer', info_mode=visualization_params['info_mode'])  # fallback
 
         if raster:
             with rasterio.open(raster) as src:
@@ -141,4 +166,5 @@ def display_data(gpkg_path=None, gdf=None, raster=None, col=None, cmap='viridis'
         if layer_selector:
             controls = widgets.HBox([layer_selector, controls])
 
-    display(controls, m)
+    ui = widgets.VBox([controls, warning_label])
+    display(ui, m)
