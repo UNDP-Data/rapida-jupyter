@@ -55,10 +55,12 @@ if [ ! -z "$JUPYTER_USERS" ]; then
             mkdir -p /home/$username/.ipython/profile_default/startup
             chown -R $username:$username /home/$username/.ipython
 
+            home_dir=$(eval echo "~$username")
+            sudo -u "$username" bash -c "source /app/.venv/bin/activate && cd \"$home_dir\" && rapida init --no-input" 2>&1 | tee "/var/log/rapida_init_$username.log"
+
             # Now copy the cell hook
             cp /app/rapida_jupyter/az/cell_hook.py /home/$username/.ipython/profile_default/startup/cell_hook.py
             chown $username:$username /home/$username/.ipython/profile_default/startup/cell_hook.py
-
         else
             echo "Invalid user format: $user_info"
         fi
