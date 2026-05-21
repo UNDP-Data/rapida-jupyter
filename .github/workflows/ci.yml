@@ -172,19 +172,20 @@ jobs:
 
   create-release:
     name: Create GitHub Release
-    # Wait for the build job to finish extracting the version and compiling layers
-    needs: [deploy-acr, deploy-github]
+    needs: [ build-image, deploy-acr, deploy-github ]
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Crucial: Must have write access to create releases
+      contents: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Generate Release Notes
+      - name: Generate or Update Release Notes
         uses: softprops/action-gh-release@v2
         with:
-          # Use the core rapida version extracted via the GH CLI earlier
           tag_name: v${{ needs.build-image.outputs.base_version }}
-          # This automatically compiles the list of merged PRs and commits
           generate_release_notes: true
+          # ==========================================================
+          # THE FIX: Prevent crashes if the version hasn't bumped yet
+          # ==========================================================
+          allowUpdates: true
