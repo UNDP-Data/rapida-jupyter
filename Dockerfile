@@ -1,71 +1,75 @@
-# Build felt/tippecanoe
-# Dockerfile from https://github.com/felt/tippecanoe/blob/main/Dockerfile
-FROM ubuntu:22.04 AS tippecanoe-builder
+# ==========================================
+# STAGE 1: Node Proxy Builder
+# ==========================================
+# Use the official Node image to guarantee version and integrity
+FROM node:22-slim AS node-builder
+RUN npm install -g configurable-http-proxy
 
-RUN apt-get update \
-  && apt-get -y install build-essential libsqlite3-dev zlib1g-dev git
+# ==========================================
+# STAGE 2: Final Jupyter Runtime
+# ==========================================
+# Inherit directly from your new CI-built base
+FROM ghcr.io/undp-data/rapida:latest
 
-RUN git clone https://github.com/felt/tippecanoe
-WORKDIR tippecanoe
-RUN make
+# Switch to root to install system-level proxy dependencies
+USER root
 
-
-# Use the GDAL image as the base
-FROM ghcr.io/osgeo/gdal:ubuntu-full-3.10.0
-
+ARG APP_DIR="/app"
 ARG GROUP_NAME="rapida"
-ARG DATA_DIR='/data'
+ARG DATA_DIR="/data"
 ARG PRODUCTION
 
-ENV GROUP_NAME $GROUP_NAME
-ENV DATA_DIR $DATA_DIR
+ENV APP_DIR=$APP_DIR
+ENV GROUP_NAME=$GROUP_NAME
+ENV DATA_DIR=$DATA_DIR
 
-# Install necessary tools and Python packages
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
-    apt-get update && \
-    apt-get install -y python3-pip pipenv \
-        gcc cmake libgeos-dev git vim sudo \
-        ca-certificates curl gnupg nodejs && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    npm install -g configurable-http-proxy
+# 1. Inject the pure Node executable
+COPY --from=node-builder /usr/local/bin/node /usr/local/bin/
 
-WORKDIR /app
+# 2. Inject the fully compiled proxy package (leaving npm and cache behind!)
+COPY --from=node-builder /usr/local/lib/node_modules/configurable-http-proxy /usr/local/lib/node_modules/configurable-http-proxy
 
-# copy pyproject.toml to install dependencies
-COPY pyproject.toml pyproject.toml
-COPY README.md README.md
+# 3. Create the symlink so JupyterHub can find the proxy command
+RUN ln -s /usr/local/lib/node_modules/configurable-http-proxy/bin/configurable-http-proxy /usr/local/bin/configurable-http-proxy
 
-# install dev and jupyter dependencies
-ENV PIPENV_VENV_IN_PROJECT=1
-ENV PLAYWRIGHT_BROWSERS_PATH=0
-RUN pipenv install --python 3 && \
-    pipenv run pip install playwright && \
-    pipenv run playwright install chromium --with-deps
-ENV VIRTUAL_ENV=/app/.venv
+# Install ONLY the necessary system tools (sudo). No more curl or nodesource!
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends sudo && \
+    apt-get autoremove -y && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# copy tippecanoe to production docker image
-COPY --from=tippecanoe-builder /tippecanoe/tippecanoe* /usr/local/bin/
-COPY --from=tippecanoe-builder /tippecanoe/tile-join /usr/local/bin/
+# Set the working directory
+WORKDIR $APP_DIR
 
-# copy rapida_jupyter package and pyproject.toml to the image.
-COPY rapida_jupyter /app/rapida_jupyter
-COPY pyproject.toml /app/pyproject.toml
-COPY README.md /app/README.md
+# ==========================================
+# DEPENDENCY LAYER CACHING
+# ==========================================
+COPY  pyproject.toml README.md ./
 
-# Conditional installation based on PRODUCTION variable
-RUN if [ -z "$PRODUCTION" ]; then \
-        pipenv run pip install -e . ; \
-    else \
-        pipenv run pip install . ; \
-    fi
-RUN pipenv --clear
+# Use uv to install external dependencies lightning fast
+RUN uv pip install --compile .
 
-
-# copy rest of files to the image.
+# ==========================================
+# APPLICATION CODE & LOCAL INSTALL
+# ==========================================
 COPY . .
 
-RUN chmod +x /app/create_user.sh
-RUN chmod +x /app/entrypoint.sh
+RUN if [ -z "$PRODUCTION" ]; then \
+        uv pip install --compile -e . ; \
+    else \
+        uv pip install --compile . ; \
+    fi
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+# ==========================================
+# PERMISSIONS & ENTRYPOINT
+# ==========================================
+RUN groupadd -f ${GROUP_NAME} && \
+    usermod -aG ${GROUP_NAME} root && \
+    chown -R :${GROUP_NAME} $APP_DIR && \
+    chmod -R g+rwx $APP_DIR && \
+    mkdir -p $DATA_DIR && \
+    chown -R :${GROUP_NAME} $DATA_DIR && \
+    chmod +x $APP_DIR/create_user.sh && \
+    chmod +x $APP_DIR/entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
