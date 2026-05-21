@@ -181,3 +181,5 @@ token_cache.json
 ap/
 rapida.json
 .DS_Store
+.local
+*.secrets
