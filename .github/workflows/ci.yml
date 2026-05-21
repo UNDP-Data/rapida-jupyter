@@ -173,7 +173,7 @@ jobs:
   create-release:
     name: Create GitHub Release
     # Wait for the build job to finish extracting the version and compiling layers
-    needs: build-image
+    needs: [deploy-acr, deploy-github]
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Crucial: Must have write access to create releases
