@@ -183,3 +183,4 @@ rapida.json
 .DS_Store
 .local
 *.secrets
+uv.lock

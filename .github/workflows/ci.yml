@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "main"  # Runs only when a PR is merged into main
-
+  workflow_dispatch:
 jobs:
 
   build-image:
