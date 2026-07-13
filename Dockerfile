@@ -33,7 +33,8 @@ COPY --from=node-builder /usr/local/lib/node_modules/configurable-http-proxy /us
 RUN ln -s /usr/local/lib/node_modules/configurable-http-proxy/bin/configurable-http-proxy /usr/local/bin/configurable-http-proxy
 
 # Install ONLY the necessary system tools (sudo). No more curl or nodesource!
-RUN rm -f /etc/apt/sources.list.d/*arrow*.list && apt-get update && \
+RUN grep -lr 'apache.jfrog.io' /etc/apt/sources.list.d/ | xargs -r rm -f && \
+    apt-get update && \
     apt-get install -y --no-install-recommends sudo && \
     apt-get autoremove -y && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
