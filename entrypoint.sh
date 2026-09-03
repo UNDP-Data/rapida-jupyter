@@ -12,7 +12,7 @@ if [ ! -z "$JUPYTER_USERS" ]; then
 
     # Ensure runtime permissions on the data directory (in case of volume mounts)
     mkdir -p $DATA_DIR
-    chown -R :${GROUP_NAME} $DATA_DIR
+    #chown -R :${GROUP_NAME} $DATA_DIR
 
     NOTEBOOKS_DIR=${DATA_DIR}/notebooks_templates
 
